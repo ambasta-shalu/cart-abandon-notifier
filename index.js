@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   firstName: String,
   lastName: String,
-  shopifyCustomerId: String,
   hasPlacedOrder: { type: Boolean, default: false },
 });
 
@@ -49,11 +48,11 @@ const AbandonedCheckout = mongoose.model("AbandonedCheckout", checkoutSchema);
 app.post("/webhook/checkout_abandoned", async (req, res) => {
   try {
     const { customer, token } = req.body;
-    const { email, first_name, last_name, id: shopifyCustomerId } = customer;
+    const { email, first_name, last_name } = customer;
 
     let user = await User.findOneAndUpdate(
       { email },
-      { firstName: first_name, lastName: last_name, shopifyCustomerId },
+      { firstName: first_name, lastName: last_name },
       { upsert: true, new: true }
     );
 
@@ -61,6 +60,7 @@ app.post("/webhook/checkout_abandoned", async (req, res) => {
       userId: user._id,
       token: token,
     });
+
     await onNewAbandonedCheckout(abandonedCheckout);
 
     res
@@ -95,7 +95,7 @@ app.post("/webhook/order_placed", async (req, res) => {
       );
     }
 
-    res.status(200).send("Order Placement Recorded");
+    res.status(200).json({ message: "Order Placement Recorded" });
   } catch (error) {
     console.error("Error in order_placed webhook:", error);
     res.status(500).send("Internal Server Error");
@@ -103,16 +103,15 @@ app.post("/webhook/order_placed", async (req, res) => {
 });
 
 // Helper functions
-async function sendMessage(checkout, message) {
+async function sendMessage(checkout, message, isLast) {
   try {
     const user = await User.findById(checkout.userId);
     if (!user.hasPlacedOrder) {
       // TODO: Integrate with an email/SMS service to send the message
-      console.log(`Sending message to ${user.email}: ${message}`);
-      console.log(`Recovery token: ${checkout.token}`);
-      await AbandonedCheckout.findByIdAndUpdate(checkout._id, {
-        $push: { messagesSent: message },
-      });
+      console.log(`Sending message to ${user.email} : ${message} has lapsed`);
+      if (isLast) {
+        console.log(`Is Last  ${user.email} : ${isLast}`);
+      }
     } else {
       console.log(
         `User ${user.email} already placed an order. No message sent.`
@@ -125,8 +124,8 @@ async function sendMessage(checkout, message) {
 
 async function scheduleReminders(checkout) {
   const scheduleTimes = [
-    { delay: 5 * 1000, message: "T + 5 sec", isLast: false },
     { delay: 10 * 1000, message: "T + 10 sec", isLast: false },
+    { delay: 20 * 1000, message: "T + 20 sec", isLast: false },
     { delay: 30 * 1000, message: "T + 30 sec", isLast: true },
   ];
 
@@ -144,11 +143,16 @@ async function scheduleReminders(checkout) {
             updatedCheckout.recoveryComplete ||
             updatedCheckout.isDeleted
           ) {
+            await sendMessage(
+              updatedCheckout,
+              "Already placed an order",
+              false
+            );
             return;
           }
 
           if (!updatedCheckout.messagesSent.includes(message)) {
-            await sendMessage(updatedCheckout, message);
+            await sendMessage(updatedCheckout, message, isLast);
 
             if (isLast) {
               await AbandonedCheckout.findByIdAndUpdate(checkout._id, {
