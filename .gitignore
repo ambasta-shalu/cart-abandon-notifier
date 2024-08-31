@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Log files
+*.log
+
+# Compiled files
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-*
