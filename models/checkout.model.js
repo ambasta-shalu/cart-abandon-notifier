@@ -6,7 +6,7 @@ const checkoutSchema = new mongoose.Schema({
   messagesSent: { type: [String], default: [] },
   recoveryComplete: { type: Boolean, default: false },
   isDeleted: { type: Boolean, default: false },
-  token: { type: String, required: true },
+  token: { type: String, required: true, unique: true },
 });
 
 module.exports = mongoose.model("AbandonedCheckout", checkoutSchema);

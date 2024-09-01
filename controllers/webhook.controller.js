@@ -13,6 +13,16 @@ exports.checkoutAbandoned = async (req, res) => {
       { upsert: true, new: true }
     );
 
+    let isCheckoutTokenExists = await AbandonedCheckout.findOne({ token });
+    if (isCheckoutTokenExists) {
+      console.log(
+        `${user.email} checkout token already exists. No message sent.`
+      );
+      return res
+        .status(200)
+        .json({ message: "Checkout Abandonment Recorded", token: token });
+    }
+
     await AbandonedCheckout.updateMany(
       { userId: user._id, isDeleted: false },
       { isDeleted: true }
