@@ -25,9 +25,9 @@ async function sendMessage(checkout, message, isLast) {
 
 async function scheduleReminders(checkout) {
   const scheduleTimes = [
-    { delay: 10 * 1000, message: "T + 10 sec", isLast: false },
-    { delay: 20 * 1000, message: "T + 20 sec", isLast: false },
-    { delay: 30 * 1000, message: "T + 30 sec", isLast: true },
+    { delay: 30 * 60 * 1000, message: "T + 30 min", isLast: false }, // 30 minutes
+    { delay: 24 * 60 * 60 * 1000, message: "T + 1 day", isLast: false }, // 1 day
+    { delay: 3 * 24 * 60 * 60 * 1000, message: "T + 3 days", isLast: true }, // 3 days
   ];
 
   const jobs = [];
