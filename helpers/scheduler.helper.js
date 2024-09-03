@@ -46,11 +46,7 @@ async function scheduleReminders(checkout) {
             updatedCheckout.recoveryComplete ||
             updatedCheckout.isDeleted
           ) {
-            await sendMessage(
-              updatedCheckout,
-              "Already placed an order",
-              false
-            );
+            console.log("Already placed an order");
             return;
           }
 
