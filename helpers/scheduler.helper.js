@@ -73,7 +73,7 @@ async function scheduleReminders(checkout) {
     }
   }
 
-  // Store the scheduled jobs for this user
+  // Stores the scheduled jobs for the user to manage or cancel them later.
   userScheduledJobs.set(checkout.userId.toString(), jobs);
 }
 

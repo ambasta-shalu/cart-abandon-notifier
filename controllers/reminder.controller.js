@@ -11,12 +11,13 @@ exports.completeOrderPlacement = async (user, token) => {
       { token: token },
       { recoveryComplete: true }
     );
-  } else {
-    await AbandonedCheckout.updateMany(
-      { userId: user._id, recoveryComplete: false },
-      { recoveryComplete: true }
-    );
   }
+  // else {
+  //   await AbandonedCheckout.updateMany(
+  //     { userId: user._id, recoveryComplete: false },
+  //     { recoveryComplete: true }
+  //   );
+  // }
 
   scheduler.cancelScheduledJobs(user._id);
 };

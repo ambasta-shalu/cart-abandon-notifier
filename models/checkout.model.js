@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const checkoutSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   abandonedAt: { type: Date, default: Date.now },
   messagesSent: { type: [String], default: [] },
   recoveryComplete: { type: Boolean, default: false },
